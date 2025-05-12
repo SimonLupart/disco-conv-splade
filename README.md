@@ -46,12 +46,12 @@ bash setup_script/dl_index_topiocqa.sh
 You can build a SPLADE index over the TopiOCQA passage collection:
 
 ```bash
-export SPLADE_CONFIG_NAME="disco_topiocqa_mistral_llama.yaml"
-
-index_dir=DATA/topiocqa_index_self
+config=disco_topiocqa_mistral_llama.yaml
 collection_path=DATA/full_wiki_segments_topiocqa.tsv
+index_dir=DATA/topiocqa_index_self
 
-python -m splade.index init_dict.model_type_or_dir=naver/splade-cocondenser-ensembledistil \
+python -m splade.index --config-name=$config \
+    init_dict.model_type_or_dir=naver/splade-cocondenser-ensembledistil \
     config.pretrained_no_yamlconfig=true \
     config.hf_training=false \
     config.index_dir="$index_dir" \
@@ -68,13 +68,14 @@ mkdir -p EXP/checkpoint_exp/
 
 config=disco_topiocqa_mistral_llama.yaml
 index_dir=DATA/topiocqa_index
+out_dir=EXP/checkpoint_exp/disco_TOPIOCQA_mistral_llama_out_hf/
 
 python -m splade.retrieve --config-name=$config \
     init_dict.model_type_or_dir_q=slupart/splade-disco-topiocqa-mistral \
     config.pretrained_no_yamlconfig=true \
     config.hf_training=false \
     config.index_dir="$index_dir" \
-    config.out_dir="EXP/checkpoint_exp/top_out_hf/"
+    config.out_dir=$out_dir
 ```
 
 You can also run inference using different models available on HuggingFace, with the models we trained on TopiOCQA:
@@ -100,27 +101,29 @@ Then train the DiSCo model using the distillation file as teacher.
 ```bash
 port=$(shuf -i 29500-29599 -n 1)
 
+config=disco_topiocqa_mistral_llama.yaml
 runpath=DATA/topiocqa_distil/distil_run_top_llama_mistral.json
-out_dir=mistral_llama
+ckpt_dir=EXP/checkpoint_exp/disco_TOPIOCQA_mistral_llama/
+
 torchrun --nproc_per_node 1 --master_port $port -m splade.hf_train \
-    --config-name=disco_topiocqa_mistral_llama.yaml  \
+    --config-name=$config  \
     data.TRAIN.DATASET_PATH=$runpath \
-    config.checkpoint_dir="EXP/checkpoint_exp/disco_TOPIOCQA_$out_dir/"
+    config.checkpoint_dir=$ckpt_dir
 ```
 
 Similarly you can evaluate this model:
 
 ```bash
 config=disco_topiocqa_mistral_llama.yaml #config_hf_splade_16neg_nodistil_TOPIOCQA_b_2e.yaml
+ckpt_dir=EXP/checkpoint_exp/disco_TOPIOCQA_mistral_llama/
 index_dir=/gpfs/work4/0/prjs0871/disco-conv-splade/DATA/topiocqa_index
-
-base_ckpt=EXP/checkpoint_exp/disco_TOPIOCQA_$out_dir/
+out_dir=EXP/checkpoint_exp/disco_TOPIOCQA_mistral_llama_out/
 
 python -m splade.retrieve \
     --config-name=$config \
-    config.checkpoint_dir="$base_ckpt/" \
-    config.index_dir="$index_dir" \
-    config.out_dir="EXP/checkpoint_exp/disco_topiocqa_out/"
+    config.checkpoint_dir=$ckpt_dir \
+    config.index_dir=$index_dir \
+    config.out_dir=$out_dir
 ```
 
 ## 4. Additional Resources
