@@ -1,6 +1,17 @@
-SPLADE v0.1.1
-Copyright (c) 2021-present NAVER Corp.
-Creative Commons Attribution-NonCommercial-ShareAlike 4.0 license
+DiSCo for Conversational Search  
+Copyright (c) 2025 Simon Lupart
+
+This repository contains original research code developed for the paper:
+
+"DiSCo: LLM Knowledge Distillation for Efficient Sparse Retrieval in Conversational Search"  
+(Simon Lupart et al., SIGIR 2025)
+
+This work is based in part on SPLADE v0.1.1,  
+Copyright (c) 2021-present NAVER Corp.,  
+licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0).
+
+As required by the ShareAlike clause, this repository as a whole is distributed under the same license:  
+**CC BY-NC-SA 4.0 International**
 
 A summary of the CC BY-NC-SA 4.0 license is located here:
 	https://creativecommons.org/licenses/by-nc-sa/4.0/

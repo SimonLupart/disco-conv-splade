@@ -32,7 +32,7 @@ with open(path_data+"raw_dev.json", "r") as f:
                 all_user_question = topic_turn["question"].split("[SEP]")
                 all_user_question.reverse()
                 tsv_queries_last.write(str(i)+"\t"+user_question+"\n")
-                tsv_queries_all.write(str(i)+"\t"+" ".join(all_user_question)+"\n")
+                tsv_queries_all.write(str(i)+"\t"+" [SEP] ".join(all_user_question)+"\n")
                 qrels[str(i)] = {topic_turn["positive_ctxs"][0]["passage_id"]: 1}
         # mapturnid2rowid[turn_id]=str(i)
 json.dump(qrels, open(path_data+"qrel_rowid_dev.json", "w"))

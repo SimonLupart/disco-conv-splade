@@ -42,7 +42,6 @@ python -m splade.retrieve --config-name=$config \
 base_ckpt=/projects/0/prjs0871/splade/EXP/RW/splade++_TOPIOCQA_rwMiLl_10_1000_all__
 
 python -m splade.retrieve --config-name=$config \
-    init_dict.model_type_or_dir_q=slupart/splade-disco-topiocqa-mistral \
     config.checkpoint_dir="$base_ckpt/" \
     config.index_dir="$index_dir" \
     config.out_dir="/gpfs/work4/0/prjs0871/disco-conv-splade/EXP/checkpoint_exp/top_out_hf/"

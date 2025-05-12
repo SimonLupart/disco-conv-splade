@@ -47,17 +47,17 @@ data:
   type: json
   TRAIN:
     DATASET_PATH: ??
-    D_COLLECTION_PATH: /gpfs/work4/0/prjs0871/topiocqa/downloads/data/wikipedia_split/full_wiki_segments.tsv
-    Q_COLLECTION_PATH: /gpfs/work4/0/prjs0871/DATA/splade/topiocqa/all_history/queries_rowid_all_TOPIOCQA.tsv
-    QREL_PATH: /gpfs/work4/0/prjs0871/DATA/splade/topiocqa/all_history/qrel_rowid_TOPIOCQA.json
+    D_COLLECTION_PATH: DATA/full_wiki_segments_topiocqa.tsv
+    Q_COLLECTION_PATH: DATA/topiocqa_topics/queries_rowid_train_all.tsv
+    QREL_PATH: DATA/topiocqa_topics/qrel_rowid_train.json
     TOPK_mi: 10
     TOPK_ma: 950
-  COLLECTION_PATH: /gpfs/work4/0/prjs0871/topiocqa/downloads/data/wikipedia_split/full_wiki_segments.tsv
+  COLLECTION_PATH: DATA/full_wiki_segments_topiocqa.tsv
   Q_COLLECTION_PATH:
-  - /gpfs/work4/0/prjs0871/DATA/splade/topiocqa/all_history/queries_rowid_dev_all_TOPIOCQA.tsv
+  - DATA/topiocqa_topics/queries_rowid_dev_all.tsv
   EVAL_QREL_PATH:
-  - /gpfs/work4/0/prjs0871/DATA/splade/topiocqa/all_history/qrel_rowid_dev_TOPIOCQA.json
-  flops_queries: /projects/0/prjs0871/DATA/splade/flops/all_dev_queries/
+  - DATA/topiocqa_topics/qrel_rowid_dev.json
+  flops_queries: DATA/topiocqa_topics/queries_rowid_dev_all.tsv
 init_dict:
   model_type_or_dir: naver/splade-cocondenser-ensembledistil
   model_type_or_dir_q: naver/splade-cocondenser-ensembledistil

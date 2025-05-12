@@ -183,15 +183,15 @@ def get_initialize_config(exp_dict: DictConfig, train=False):
 
         #if HF: need to update config (except for adapters...).
         #if not "adapter_name" in config and "hf_training" in config:
-        print("wergwegrwth Encoder queries", init_dict.model_type_or_dir_q)
-        print("wergwegrwth Encoder documents", init_dict.model_type_or_dir)
+        print("Initial Encoder queries: ", init_dict.model_type_or_dir_q)
+        print("Initial Encoder documents: ", init_dict.model_type_or_dir)
         if init_dict.model_type_or_dir_q:
-            print("yo")
+            print("Using separate query encoder.")
         if  "hf_training" in config and config["hf_training"]:
             init_dict.model_type_or_dir=os.path.join(config.checkpoint_dir,"model")
             init_dict.model_type_or_dir_q=os.path.join(config.checkpoint_dir,"model/query") if init_dict.model_type_or_dir_q else None
-        print("wergwegrwth Encoder queries init", init_dict.model_type_or_dir_q)
-        print("wergwegrwth Encoder documents init", init_dict.model_type_or_dir)
+        print("Final Encoder queries: ", init_dict.model_type_or_dir_q)
+        print("Final Encoder documents: ", init_dict.model_type_or_dir)
                    
     return exp_dict, config, init_dict, model_training_config
 

@@ -100,7 +100,7 @@ Then train the DiSCo model using the distillation file as teacher.
 ```bash
 port=$(shuf -i 29500-29599 -n 1)
 
-runpath=DATA/topiocqa_distil/distil_run_top_mistral.json
+runpath=DATA/topiocqa_distil/distil_run_top_llama_mistral.json
 out_dir=mistral_llama
 torchrun --nproc_per_node 1 --master_port $port -m splade.hf_train \
     --config-name=disco_topiocqa_mistral_llama.yaml  \
@@ -111,11 +111,13 @@ torchrun --nproc_per_node 1 --master_port $port -m splade.hf_train \
 Similarly you can evaluate this model:
 
 ```bash
+config=disco_topiocqa_mistral_llama.yaml #config_hf_splade_16neg_nodistil_TOPIOCQA_b_2e.yaml
+index_dir=/gpfs/work4/0/prjs0871/disco-conv-splade/DATA/topiocqa_index
+
 base_ckpt=EXP/checkpoint_exp/disco_TOPIOCQA_$out_dir/
 
 python -m splade.retrieve \
     --config-name=$config \
-    init_dict.model_type_or_dir_q=slupart/splade-disco-topiocqa-mistral \
     config.checkpoint_dir="$base_ckpt/" \
     config.index_dir="$index_dir" \
     config.out_dir="EXP/checkpoint_exp/disco_topiocqa_out/"
@@ -130,6 +132,8 @@ You can find all trained models on HuggingFace in our [disco-splade-conv](https:
 * Mistral Rewritten Queries on all test sets used as baselines (TopiOCQA, QReCC, TREC CAsT 2020, TREC CAsT 2022, TREC iKAT 2023)
 
 This code can also be adapted to train DiSCo on QReCC and do inference on the TREC CAsT and iKAT datasets.
+
+Snippet code for Training, Indexing and Retrieval can be found in `train.sh`, `index.sh` and `retrieve.sh`.
 
 ## 5. 🙏 Acknowledgments
 
