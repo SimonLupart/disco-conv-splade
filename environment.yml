@@ -119,4 +119,3 @@ dependencies:
       - tokenizers==0.19.1
       - tqdm==4.66.4
       - transformers==4.41.2
-prefix: /projects/0/prjs0871/miniconda/envs/cs

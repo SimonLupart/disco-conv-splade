@@ -114,9 +114,9 @@ torchrun --nproc_per_node 1 --master_port $port -m splade.hf_train \
 Similarly you can evaluate this model:
 
 ```bash
-config=disco_topiocqa_mistral_llama.yaml #config_hf_splade_16neg_nodistil_TOPIOCQA_b_2e.yaml
+config=disco_topiocqa_mistral_llama.yaml
 ckpt_dir=EXP/checkpoint_exp/disco_TOPIOCQA_mistral_llama/
-index_dir=/gpfs/work4/0/prjs0871/disco-conv-splade/DATA/topiocqa_index
+index_dir=DATA/topiocqa_index
 out_dir=EXP/checkpoint_exp/disco_TOPIOCQA_mistral_llama_out/
 
 python -m splade.retrieve \
@@ -143,7 +143,7 @@ Snippet code for Training, Indexing and Retrieval can be found in `train.sh`, `i
 This work builds on and would not be possible without the following open-source contributions:
 
 * [SPLADE](https://github.com/naver/splade) by Naver Labs Europe
-* [TopiOCQA](https://github.com/prdwb/topiocqa)
+* [TopiOCQA](https://mcgill-nlp.github.io/topiocqa/)
 * [QReCC](https://github.com/apple/ml-qrecc)
 * HuggingFace 🤗 ecosystem
 
@@ -180,6 +180,6 @@ series = {SIGIR '22}
 
 ## 6. 📜 License
 
-This repository is released under the **MIT License**.
+This repository is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
 See the [LICENSE](./LICENSE) file for details.
 
