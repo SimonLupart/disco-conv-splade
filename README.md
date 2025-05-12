@@ -126,7 +126,7 @@ python -m splade.retrieve \
     config.out_dir=$out_dir
 ```
 
-## 4. Additional Resources
+## 4. 🚀 Additional Resources
 
 You can find all trained models on HuggingFace in our [disco-splade-conv](https://huggingface.co/collections/slupart/splade-conversational-6800f23d0c61997aa33cf4e4) Collection:
 
@@ -146,6 +146,10 @@ This work builds on and would not be possible without the following open-source 
 * [TopiOCQA](https://mcgill-nlp.github.io/topiocqa/)
 * [QReCC](https://github.com/apple/ml-qrecc)
 * HuggingFace 🤗 ecosystem
+
+Feel free to contact us by email s.c.lupart@uva.nl
+
+## 6. 📜 Citations
 
 Please cite our SIGIR 2025 paper and the original SPLADE works if you use this work:
 * SIGIR 2025 full paper, DiSCo
@@ -178,7 +182,7 @@ series = {SIGIR '22}
 }
 ```
 
-## 6. 📜 License
+## 7. License
 
 This repository is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
 See the [LICENSE](./LICENSE) file for details.
