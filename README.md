@@ -153,7 +153,7 @@ Feel free to contact us by email s.c.lupart@uva.nl
 
 Please cite our SIGIR 2025 paper and the original SPLADE works if you use this work:
 * SIGIR 2025 full paper, DiSCo
-```
+```bibtex
 @article{lupart2024disco,
   title={DiSCo Meets LLMs: A Unified Approach for Sparse Retrieval and Contextual Distillation in Conversational Search},
   author={Lupart, Simon and Aliannejadi, Mohammad and Kanoulas, Evangelos},
@@ -162,7 +162,7 @@ Please cite our SIGIR 2025 paper and the original SPLADE works if you use this w
 }
 ```
 * SIGIR22 short paper, SPLADE++ (v2bis)
-```
+```bibtex
 @inproceedings{10.1145/3477495.3531857,
 author = {Formal, Thibault and Lassance, Carlos and Piwowarski, Benjamin and Clinchant, St\'{e}phane},
 title = {From Distillation to Hard Negative Sampling: Making Sparse Neural IR Models More Effective},
