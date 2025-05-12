@@ -68,7 +68,7 @@ class CollectionDatasetPreLoad(Dataset):
     we preload everything in memory at init
     """
 
-    def __init__(self, data_dir, id_style, max_sample=None, filter=False, split=0):
+    def __init__(self, data_dir, id_style, max_sample=None, topiocqa=False):
         self.data_dir = data_dir
         assert id_style in ("row_id", "content_id"), "provide valid id_style"
         # id_style indicates how we access the doc/q (row id or doc/q id)
@@ -83,31 +83,10 @@ class CollectionDatasetPreLoad(Dataset):
             path_collection = self.data_dir
         with open(path_collection) as reader:
             for i, line in enumerate(tqdm(reader)):
-                if split:
-                    if i>=8000000*int(split):
-                        break
-                    if i<8000000*(int(split)-1):
-                        continue
-                    # if str(split)=="1":
-                    #     if i>12500000:
-                    #         break
-                    # elif str(split)=="2":
-                    #     if i>25000000:
-                    #         break
-                    #     if i<=12500000:
-                    #         continue
-                    # elif str(split)=="3":
-                    #     if i>37500000:
-                    #         break
-                    #     if i<=25000000:
-                    #         continue
-                    # elif str(split)=="4":
-                    #     if i<=37500000:
-                    #         continue
                 if max_sample and i>max_sample:
                     break
                 if len(line) > 1:
-                    if filter:
+                    if topiocqa:
                         if i==0: # header
                             continue
                         id_, text, title = line.split("\t")  # first column is id
@@ -134,30 +113,6 @@ class CollectionDatasetPreLoad(Dataset):
             return self.line_dict[idx], self.data_dict[idx]
         else:
             return str(idx), self.data_dict[str(idx)]
-
-
-class BeirDataset(Dataset):
-    """
-    dataset to iterate over a BEIR collection
-    we preload everything in memory at init
-    """
-
-    def __init__(self, value_dictionary, information_type="document"):
-        assert information_type in ["document", "query"]
-        self.value_dictionary = value_dictionary
-        self.information_type = information_type
-        if self.information_type == "document":
-            self.value_dictionary = dict()
-            for key, value in value_dictionary.items():
-                self.value_dictionary[key] = value["title"] + " " + value["text"]
-        self.idx_to_key = {idx: key for idx, key in enumerate(self.value_dictionary)}
-
-    def __len__(self):
-        return len(self.value_dictionary)
-
-    def __getitem__(self, idx):
-        true_idx = self.idx_to_key[idx]
-        return idx, self.value_dictionary[true_idx]
 
 
 class MsMarcoHardNegatives(Dataset):

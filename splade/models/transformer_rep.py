@@ -2,7 +2,7 @@ from abc import ABC
 
 import torch
 from torch import nn
-from transformers import AutoTokenizer, AutoModelForMaskedLM, AutoModel, RobertaForSequenceClassification, AutoConfig
+from transformers import AutoTokenizer, AutoModelForMaskedLM, AutoModel
 
 from ..tasks.amp import NullContextManager
 from ..utils.utils import generate_bow, clean_bow, normalize, pruning
@@ -11,55 +11,6 @@ from ..utils.utils import generate_bow, clean_bow, normalize, pruning
 we provide abstraction classes from which we can easily derive representation-based models with transformers like SPLADE
 with various options (one or two encoders, freezing one encoder etc.) 
 """
-
-
-class ANCE(RobertaForSequenceClassification):
-    # class Pooler:   # adapt to DPR
-    #     def __init__(self, pooler_output):
-    #         self.pooler_output = pooler_output
-
-    def __init__(self, config):
-        RobertaForSequenceClassification.__init__(self, config)
-        self.embeddingHead = nn.Linear(config.hidden_size, 768) # ANCE has
-        self.norm = nn.LayerNorm(768)
-        self.apply(self._init_weights)
-        self.use_mean = False
-        print("ANCE init", flush=True)
-    
-    def _init_weights(self, module):
-        """ Initialize the weights """
-        if isinstance(module, (nn.Linear, nn.Embedding, nn.Conv1d)):
-            # Slightly different from the TF version which uses truncated_normal for initialization
-            # cf https://github.com/pytorch/pytorch/pull/5617
-            module.weight.data.normal_(mean=0.0, std=0.02)
-
-    def query_emb(self, input_ids, attention_mask):
-        outputs1 = self.roberta(input_ids=input_ids,
-                                attention_mask=attention_mask)
-        outputs1 = outputs1.last_hidden_state
-        full_emb = self.masked_mean_or_first(outputs1, attention_mask)
-        query1 = self.norm(self.embeddingHead(full_emb))
-        return query1
-
-
-    def doc_emb(self, input_ids, attention_mask):
-        return self.query_emb(input_ids, attention_mask)
-    
-
-    def masked_mean_or_first(self, emb_all, mask):
-        if self.use_mean:
-            return self.masked_mean(emb_all, mask)
-        else:
-            return emb_all[:, 0]
-    
-    def masked_mean(self, t, mask):
-        s = torch.sum(t * mask.unsqueeze(-1).float(), axis=1)
-        d = mask.sum(axis=1, keepdim=True).float()
-        return s / d
-    
-    def forward(self, input_ids, attention_mask, wrap_pooler=False):
-        return self.query_emb(input_ids, attention_mask)
-
 
 class TransformerRep(torch.nn.Module):
 
@@ -72,79 +23,27 @@ class TransformerRep(torch.nn.Module):
         super().__init__()
         assert output in ("mean", "cls", "hidden_states", "MLM"), "provide valid output"
 
-        self.is_ance = "ance" in model_type_or_dir.lower()
-
-        if self.is_ance:
-            # Utiliser ANCE
-            config = AutoConfig.from_pretrained(model_type_or_dir)
-            self.transformer = ANCE(config)
-            # List all keys in the ANCE model's state_dict
-            # print("All keys: ")
-            # for key in self.transformer.state_dict().keys():
-            #     print(key)
-            self.transformer.load_state_dict(torch.load(model_type_or_dir+"/pytorch_model.bin"), strict=False)
-        else:
-            # Utiliser un modèle standard (BERT, etc.)
-            model_class = AutoModel if output != "MLM" else AutoModelForMaskedLM
-            self.transformer = model_class.from_pretrained(model_type_or_dir)
-
+        # Utiliser un modèle standard (BERT, etc.)
+        model_class = AutoModel if output != "MLM" else AutoModelForMaskedLM
+        self.transformer = model_class.from_pretrained(model_type_or_dir)
         self.tokenizer = AutoTokenizer.from_pretrained(model_type_or_dir)
         self.output = output
         self.fp16 = fp16
 
     def forward(self, **tokens):
         with torch.cuda.amp.autocast() if self.fp16 else NullContextManager():
-            if self.is_ance:
-                # Utilisation d'ANCE pour l'encodage
-                embeddings = self.transformer.query_emb(tokens['input_ids'], tokens['attention_mask'])
-                return embeddings
+            # Utilisation d'un modèle standard
+            out = self.transformer(**tokens)
+            if self.output == "MLM":
+                return out
+            hidden_states = out[0]  # first element is hidden states, shape (bs, seq_len, hidden_dim)
+            if self.output == "mean":
+                return torch.sum(hidden_states * tokens["attention_mask"].unsqueeze(-1),
+                                    dim=1) / torch.sum(tokens["attention_mask"], dim=-1, keepdim=True)
+            elif self.output == "cls":
+                return hidden_states[:, 0, :]  # returns [CLS] representation
             else:
-                # Utilisation d'un modèle standard
-                out = self.transformer(**tokens)
-                if self.output == "MLM":
-                    return out
-                hidden_states = out[0]  # first element is hidden states, shape (bs, seq_len, hidden_dim)
-                if self.output == "mean":
-                    return torch.sum(hidden_states * tokens["attention_mask"].unsqueeze(-1),
-                                     dim=1) / torch.sum(tokens["attention_mask"], dim=-1, keepdim=True)
-                elif self.output == "cls":
-                    return hidden_states[:, 0, :]  # returns [CLS] representation
-                else:
-                    return hidden_states, tokens["attention_mask"]
-
-# class TransformerRep(torch.nn.Module):
-
-#     def __init__(self, model_type_or_dir, output, fp16=False):
-#         """
-#         output indicates which representation(s) to output from transformer ("MLM" for MLM model)
-#         model_type_or_dir is either the name of a pre-trained model (e.g. bert-base-uncased), or the path to
-#         directory containing model weights, vocab etc.
-#         """
-#         super().__init__()
-#         assert output in ("mean", "cls", "hidden_states", "MLM"), "provide valid output"
-#         model_class = AutoModel if output != "MLM" else AutoModelForMaskedLM
-#         print(model_type_or_dir)
-#         self.transformer = model_class.from_pretrained(model_type_or_dir)
-#         self.tokenizer = AutoTokenizer.from_pretrained(model_type_or_dir)
-#         self.output = output
-#         self.fp16 = fp16
-
-#     def forward(self, **tokens):
-#         with torch.cuda.amp.autocast() if self.fp16 else NullContextManager():
-#             # tokens: output of HF tokenizer
-#             out = self.transformer(**tokens)
-#             if self.output == "MLM":
-#                 return out
-#             hidden_states = self.transformer(**tokens)[0]
-#             # => forward from AutoModel returns a tuple, first element is hidden states, shape (bs, seq_len, hidden_dim)
-#             if self.output == "mean":
-#                 return torch.sum(hidden_states * tokens["attention_mask"].unsqueeze(-1),
-#                                  dim=1) / torch.sum(tokens["attention_mask"], dim=-1, keepdim=True)
-#             elif self.output == "cls":
-#                 return hidden_states[:, 0, :]  # returns [CLS] representation
-#             else:
-#                 return hidden_states, tokens["attention_mask"]
-#                 # no pooling, we return all the hidden states (+ the attention mask)
+                return hidden_states, tokens["attention_mask"]
 
 
 class SiameseBase(torch.nn.Module, ABC):
@@ -218,18 +117,6 @@ class SiameseBase(torch.nn.Module, ABC):
         # for k in out:
         #     print(k+ " size: ", out[k].size())
         return out
-
-
-class Siamese(SiameseBase):
-    """standard dense encoder class
-    """
-
-    def __init__(self, *args, **kwargs):
-        # same args as SiameseBase
-        super().__init__(output="cls", *args, **kwargs)
-
-    def encode(self, tokens, is_q):
-        return self.encode_(tokens, is_q)
 
 
 class Splade(SiameseBase):

@@ -1,0 +1,12 @@
+# Ignore experiment outputs and data
+EXP/
+DATA/
+
+# Ignore Python cache
+__pycache__/
+**/__pycache__/
+
+*.log
+*.pt
+*.tar.gz
+outputs/

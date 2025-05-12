@@ -1,0 +1,84 @@
+config:
+  lr: 2.0e-05
+  seed: 123
+  gradient_accumulation_steps: 1
+  weight_decay: 0.01
+  validation_metrics:
+  - MRR@10
+  - recall@100
+  - recall@200
+  - recall@500
+  pretrained_no_yamlconfig: false
+  nb_iterations: 150000
+  train_batch_size: 10
+  eval_batch_size: 64
+  index_retrieve_batch_size: 64
+  record_frequency: 10000
+  train_monitoring_freq: 500
+  warmup_steps: 6000
+  max_length: 256
+  fp16: true
+  matching_type: splade
+  monitoring_ckpt: MRR@10
+  tokenizer_type: Luyu/co-condenser-marco
+  top_k: 1000
+  threshold: 0
+  eval_metric:
+  - - mrr_10
+    - mrr_1000
+    - recall
+  retrieval_name:
+  - TOPIOCQA
+  regularizer:
+    FLOPS:
+      lambda_d: 0
+      targeted_rep: rep
+      reg: FLOPS
+    L1:
+      lambda_q: 0
+      targeted_rep: rep
+      reg: L1
+  checkpoint_dir: ??
+  index_dir: ??
+  out_dir: ??
+  hf_training: true
+  config.lr: 2.0e-05
+data:
+  type: json
+  TRAIN:
+    DATASET_PATH: ??
+    D_COLLECTION_PATH: /gpfs/work4/0/prjs0871/topiocqa/downloads/data/wikipedia_split/full_wiki_segments.tsv
+    Q_COLLECTION_PATH: /gpfs/work4/0/prjs0871/DATA/splade/topiocqa/all_history/queries_rowid_all_TOPIOCQA.tsv
+    QREL_PATH: /gpfs/work4/0/prjs0871/DATA/splade/topiocqa/all_history/qrel_rowid_TOPIOCQA.json
+    TOPK_mi: 10
+    TOPK_ma: 950
+  COLLECTION_PATH: /gpfs/work4/0/prjs0871/topiocqa/downloads/data/wikipedia_split/full_wiki_segments.tsv
+  Q_COLLECTION_PATH:
+  - /gpfs/work4/0/prjs0871/DATA/splade/topiocqa/all_history/queries_rowid_dev_all_TOPIOCQA.tsv
+  EVAL_QREL_PATH:
+  - /gpfs/work4/0/prjs0871/DATA/splade/topiocqa/all_history/qrel_rowid_dev_TOPIOCQA.json
+  flops_queries: /projects/0/prjs0871/DATA/splade/flops/all_dev_queries/
+init_dict:
+  model_type_or_dir: naver/splade-cocondenser-ensembledistil
+  model_type_or_dir_q: naver/splade-cocondenser-ensembledistil
+  freeze_d_model: 1
+  agg: max
+  fp16: true
+hf:
+  training:
+    resume_from_checkpoint: false
+    ddp_find_unused_parameters: false
+    fp16: true
+    logging_steps: 5000
+    save_strategy: epoch
+    dataloader_drop_last: true
+    num_train_epochs: 5
+    warmup_ratio: 0.01
+    mse_margin: false
+    weight_decay: 0
+  model:
+    dense: false
+    shared_weights: false
+  data:
+    distillation: false
+    n_negatives: 16
