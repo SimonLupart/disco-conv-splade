@@ -141,7 +141,7 @@ This work builds on and would not be possible without the following open-source 
 * HuggingFace 🤗 ecosystem
 
 Please cite our SIGIR 2025 paper and the original SPLADE works if you use this work:
-* SIGIR 2025 full paper DiSCo
+* SIGIR 2025 full paper, DiSCo
 ```
 @article{lupart2024disco,
   title={DiSCo Meets LLMs: A Unified Approach for Sparse Retrieval and Contextual Distillation in Conversational Search},
@@ -150,7 +150,7 @@ Please cite our SIGIR 2025 paper and the original SPLADE works if you use this w
   year={2024}
 }
 ```
-* SIGIR 2021 short paper SPLADE (v1)
+* SIGIR22 short paper, SPLADE++ (v2bis)
 ```
 @inproceedings{10.1145/3477495.3531857,
 author = {Formal, Thibault and Lassance, Carlos and Piwowarski, Benjamin and Clinchant, St\'{e}phane},
