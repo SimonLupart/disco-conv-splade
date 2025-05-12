@@ -1,8 +1,8 @@
 # 🤖 [SIGIR 2025] DiSCo: LLM Knowledge Distillation for Efficient Sparse Retrieval in Conversational Search
 
-This repository contains the code and resources for our **SIGIR 2025 full paper** DiSCo for Conversational Search by Lupart et al. It is based on the SPLADE github by Naver [[link]](https://github.com/naver/splade).
+This repository contains the code and resources for our **SIGIR 2025 full paper** DiSCo for Conversational Search by Lupart et al. It is based on the SPLADE github by Naver [[link]](https://github.com/naver/splade), using a huggingface trainer for training, and the default code for index and retrieval.
 
-We provide below an example of usage of the github with the training, indexing and retrieval pipeline on TopiOCQA.
+We provide below an example of usage of the github for training, indexing and retrieval on TopiOCQA.
 
 ## 1. 🗂️ Installation and Dataset Download
 
@@ -23,17 +23,17 @@ bash setup_script/dl_topiocqa.sh
 
 ### Preprocessing
 
-We provide scripts to preprocess the TopiOCQA conversation data into a format suitable for indexing and retrieval (queries, contexts, relevance labels, etc.).
+We provide scripts to preprocess the TopiOCQA conversation data into a format suitable for indexing and retrieval (queries, contexts, relevance labels, etc.). By default we use row numbers as id instead of the original conv_turn format.
 
 ```bash
 python setup_script/parse_topiocqa.py
 ```
 
 
-
 ## 2. 🚀 Inference
 
-We support two modes of inference: using our prebuilt index or indexing the collection yourself.
+We support two modes of inference: 1. (Recommended) Using our prebuilt index, indexed with the checkpoint 
+`naver/splade-cocondenser-ensembledistil`; OR 2. Indexing the collection yourself.
 
 ### Download a Prebuilt SPLADE Index
 
@@ -43,7 +43,7 @@ bash setup_script/dl_index_topiocqa.sh
 
 ### (Optional) You can indexing the TopiOCQA collection with SPLADE yourself
 
-You can build a SPLADE index over the TOPIOCQA passage collection.
+You can build a SPLADE index over the TopiOCQA passage collection:
 
 ```bash
 export SPLADE_CONFIG_NAME="disco_topiocqa_mistral_llama.yaml"
@@ -61,7 +61,7 @@ python -m splade.index init_dict.model_type_or_dir=naver/splade-cocondenser-ense
 
 ### Retrieval with DiSCo
 
-We will release retrieval scripts that allow running inference with DiSCo using our trained models.
+Retrieval script using one of our DiSCo HuggingFace checkpoint:
 
 ```bash
 mkdir -p EXP/checkpoint_exp/
@@ -77,7 +77,7 @@ python -m splade.retrieve --config-name=$config \
     config.out_dir="EXP/checkpoint_exp/top_out_hf/"
 ```
 
-You will also be able to run inference using different models available on HuggingFace, with the models with trained on TopiOCQA:
+You can also run inference using different models available on HuggingFace, with the models we trained on TopiOCQA:
 
 * `slupart/splade-disco-topiocqa-mistral`
 * `slupart/splade-disco-topiocqa-llama-mistral`
@@ -85,17 +85,22 @@ You will also be able to run inference using different models available on Huggi
 
 ## 3. 🚀 Training
 
-We distill knowledge from large LLMs (e.g. LLaMA, Mistral) into a sparse retriever via multi-teacher distillation.
+In DiSCO, we distill knowledge from LLMs (e.g. LLaMA, Mistral) into a sparse retriever via multi-teacher distillation.
 
 ### Distillation on TopiOCQA
 
 First download the distillation file for TopiOCQA, from Mistral and Llama
-*Coming soon: `disco/train_distill.py`*
+
+```bash
+bash setup_script/dl_distillation_topiocqa.sh
+```
+
+Then train the DiSCo model using the distillation file as teacher.
 
 ```bash
 port=$(shuf -i 29500-29599 -n 1)
 
-runpath=DATA/topiocqa_distil/distil_run_top_mistral_llama.json
+runpath=DATA/topiocqa_distil/distil_run_top_mistral.json
 out_dir=mistral_llama
 torchrun --nproc_per_node 1 --master_port $port -m splade.hf_train \
     --config-name=disco_topiocqa_mistral_llama.yaml  \
@@ -106,14 +111,14 @@ torchrun --nproc_per_node 1 --master_port $port -m splade.hf_train \
 Similarly you can evaluate this model:
 
 ```bash
-base_ckpt=/projects/0/prjs0871/splade/EXP/RW/splade++_TOPIOCQA_rwMiLl_10_1000_all__
+base_ckpt=EXP/checkpoint_exp/disco_TOPIOCQA_$out_dir/
 
 python -m splade.retrieve \
     --config-name=$config \
     init_dict.model_type_or_dir_q=slupart/splade-disco-topiocqa-mistral \
     config.checkpoint_dir="$base_ckpt/" \
     config.index_dir="$index_dir" \
-    config.out_dir="EXP/checkpoint_exp/top_out/"
+    config.out_dir="EXP/checkpoint_exp/disco_topiocqa_out/"
 ```
 
 ## 4. Additional Resources

@@ -93,8 +93,5 @@ def hf_train(exp_dict: DictConfig):
             json.dump(training_args.to_dict(), write_file, indent=4)
 
 
-   
-
-
 if __name__ == "__main__":
     hf_train()

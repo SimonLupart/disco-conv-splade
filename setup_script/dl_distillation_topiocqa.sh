@@ -1,0 +1,1 @@
+wget -O DATA/topiocqa_distil/distil_run_top_mistral.json https://huggingface.co/datasets/slupart/topiocqa-distillation-mistral-splade/resolve/main/run.json

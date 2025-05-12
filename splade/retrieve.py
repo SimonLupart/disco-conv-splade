@@ -24,21 +24,16 @@ def retrieve_evaluate(exp_dict: DictConfig):
 
     model = get_model(config, init_dict)
 
-    # batch_size = 1 #500
-    batch_size = 500
-    # NOTE: batch_size is set to 1, currently no batched implem for retrieval (TODO)
+    batch_size = config["index_retrieve_batch_size"]
     for data_dir in set(exp_dict["data"]["Q_COLLECTION_PATH"]):
-        if "ultrachat" in data_dir:
-            q_collection = CollectionDatasetPreLoad(data_dir=data_dir, id_style="row_id", max_sample=15000)
-        else:
-            q_collection = CollectionDatasetPreLoad(data_dir=data_dir, id_style="row_id")
+        q_collection = CollectionDatasetPreLoad(data_dir=data_dir, id_style="row_id")
         q_loader = CollectionDataLoader(dataset=q_collection, tokenizer_type=model_training_config["tokenizer_type"],
                                         max_length=model_training_config["max_length"], batch_size=batch_size,
                                         shuffle=False, num_workers=1)
 
         evaluator = SparseRetrieval(config=config, model=model, dataset_name=get_dataset_name(data_dir),
                                 compute_stats=True, dim_voc=model.output_dim)
-        # evaluator.retrieve(q_loader, top_k=exp_dict["config"]["top_k"], threshold=exp_dict["config"]["threshold"])
+
         evaluator.batch_retrieve(q_loader, top_k=exp_dict["config"]["top_k"], threshold=exp_dict["config"]["threshold"])
         evaluator = None
         gc.collect()
